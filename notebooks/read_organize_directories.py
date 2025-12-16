@@ -127,10 +127,87 @@ all_files.head(3)
 # %%
 df.head(3)
 
+# %% [markdown]
+# ### Read add varieties
+
+# %%
+planting_harvest_dates = pd.read_excel(data_base + "planting_harvest_dates.xlsx")
+varieties_traits = pd.read_excel(data_base + "varieties_traits.xlsx")
+
+
+planting_harvest_dates.columns = planting_harvest_dates.columns.str.lower()
+planting_harvest_dates.head(2)
+
+# %%
+varieties_traits.columns = varieties_traits.columns.str.lower()
+varieties_traits.columns = varieties_traits.columns.str.replace(' ', '_')
+varieties_traits.rename(columns={'irrigationstatus': 'irrigation_status'}, inplace=True)
+varieties_traits.head(3)
+
+# %%
+all_files.head(2)
+
+# %%
+varieties_traits["irrigation_status"].unique()
+
+# %%
+varieties_traits.groupby(["irrigation_status"]).count()
+
+# %%
+varieties_traits.groupby(["irrigation_status"]).size()
+
+# %%
+varieties_traits["grain_yield"].isna().sum() 
+
+# %%
+varieties_traits[varieties_traits.irrigation_status=="irrigated"].location.unique()
+
+# %%
+dryland_locs = list(varieties_traits[varieties_traits.irrigation_status=="dryland"].location.unique())
+irrigated_locs = list(varieties_traits[varieties_traits.irrigation_status=="irrigated"].location.unique())
+
+# %%
+print([x for x in dryland_locs if ( x in irrigated_locs)])
+print([x for x in irrigated_locs if ( x in dryland_locs)])
+
+# %%
+varieties_traits = varieties_traits[varieties_traits.irrigation_status=="dryland"].copy()
+varieties_traits.reset_index(drop=True, inplace=True)
+varieties_traits.head(3)
+
+# %%
+planting_harvest_dates.head(2)
+
+# %%
+all_files.head(2)
+
+# %%
+all_files['date'] = pd.to_datetime(all_files['date'])
+all_files["year"] = all_files['date'].dt.year
+all_files.head(2)
+
+# %%
+all_files = pd.merge(all_files,
+                     planting_harvest_dates[['year', 'location', 'planting date', 'harvest date']],
+                     how="left", on=["location", "year"])
+
+all_files.head(2)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
 # %%
 filename = raw_dir + "raw_all_locations_all_time_scales.sav"
 
 export_ = {"wheat_all_locs_raw": all_files,
+           "varieties_traits" : varieties_traits,
            "source_code": "read_organize_directories",
            "Author": "HN",
            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -180,6 +257,7 @@ filename = raw_dir + "raw_all_locations_separate_daily_monthly_fiveDay.sav"
 export_ = {"wheat_all_locs_raw_daily": daily_df,
            "wheat_all_locs_raw_monthly": monthly_data,
            "wheat_all_locs_raw_fiveDay": five_day_data,
+           "varieties_traits":varieties_traits,
            "source_code": "read_organize_directories",
            "Author": "HN",
            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
